@@ -1,7 +1,7 @@
 /* eslint-disable jsx-a11y/media-has-caption */
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 const Layout = styled.main`
     min-width: 100vw;
@@ -91,6 +91,26 @@ const Home: NextPage = () => {
     const [bpm, setBpm] = useState<number>(
         MINIMUM_BPM + (seekerLeftPercentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
     )
+    const onClickBpmPlus = useCallback(() => {
+        const nextBpm = bpm + 1
+        if (nextBpm > MAXIMUM_BPM) {
+            return
+        }
+        setBpm(nextBpm)
+        setSeekerLeftPercentage(
+            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
+        )
+    }, [bpm])
+    const onClickBpmMinus = useCallback(() => {
+        const nextBpm = bpm - 1
+        if (nextBpm < MINIMUM_BPM) {
+            return
+        }
+        setBpm(nextBpm)
+        setSeekerLeftPercentage(
+            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
+        )
+    }, [bpm])
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
@@ -140,7 +160,7 @@ const Home: NextPage = () => {
             <ToolBox>
                 <BpmMarker>{Math.ceil(bpm)}</BpmMarker>
                 <SeekBarLayout>
-                    <CircleButton>-</CircleButton>
+                    <CircleButton onClick={onClickBpmMinus}>-</CircleButton>
                     <SeekBar ref={seekBarRef}>
                         <Seeker
                             ref={seekerRef}
@@ -149,7 +169,10 @@ const Home: NextPage = () => {
                             }}
                         />
                     </SeekBar>
-                    <CircleButton style={{ marginLeft: 'auto' }}>
+                    <CircleButton
+                        onClick={onClickBpmPlus}
+                        style={{ marginLeft: 'auto' }}
+                    >
                         +
                     </CircleButton>
                 </SeekBarLayout>
