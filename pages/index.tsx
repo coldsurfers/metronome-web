@@ -21,6 +21,9 @@ const ToolBox = styled.div`
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
     padding: 24px;
+
+    display: flex;
+    flex-direction: column;
 `
 
 const SeekBarLayout = styled.div`
@@ -46,6 +49,14 @@ const CircleButton = styled.button`
         background-color: #495057;
         color: #ffffff;
     }
+`
+
+const PlayButton = styled(CircleButton)`
+    width: 180px;
+    height: 180px;
+    margin-left: auto;
+    margin-right: auto;
+    margin-top: auto;
 `
 
 const SeekBar = styled.div`
@@ -91,6 +102,7 @@ const Home: NextPage = () => {
     const [bpm, setBpm] = useState<number>(
         MINIMUM_BPM + (seekerLeftPercentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
     )
+    const [isPlaying, setIsPlaying] = useState<boolean>(false)
     const onClickBpmPlus = useCallback(() => {
         const nextBpm = bpm + 1
         if (nextBpm > MAXIMUM_BPM) {
@@ -111,6 +123,16 @@ const Home: NextPage = () => {
             ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
         )
     }, [bpm])
+    const onClickPlay = useCallback(() => {
+        setIsPlaying(true)
+        const ms = 60000 / bpm
+        setInterval(() => {
+            audioRef.current?.play()
+        }, ms)
+    }, [bpm])
+    const onClickPause = useCallback(() => {
+        setIsPlaying(false)
+    }, [])
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
@@ -176,6 +198,9 @@ const Home: NextPage = () => {
                         +
                     </CircleButton>
                 </SeekBarLayout>
+                <PlayButton onClick={isPlaying ? onClickPause : onClickPlay}>
+                    {isPlaying ? 'Pause' : 'Play'}
+                </PlayButton>
                 {/* <button
                     type="button"
                     onClick={() => {
