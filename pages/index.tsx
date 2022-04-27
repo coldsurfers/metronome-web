@@ -51,7 +51,7 @@ const CircleButton = styled.button`
 const SeekBar = styled.div`
     flex: 1;
     background-color: #343a40;
-    height: 5.5px;
+    height: 3.5px;
     margin-left: 16px;
     margin-right: 16px;
     border-radius: 3px;
