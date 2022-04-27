@@ -37,6 +37,7 @@ const CircleButton = styled.button`
     background-color: #ffffff;
     border: 1px solid #868e96;
     cursor: pointer;
+    user-select: none;
 
     &:hover {
         background-color: #adb5bd;
