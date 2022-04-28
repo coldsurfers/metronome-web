@@ -94,6 +94,7 @@ const MINIMUM_BPM = 20
 const MAXIMUM_BPM = 240
 const BEATS_PER_BAR = 4
 const LOOK_AHEAD = 25
+const SCHEDULE_AHEAD_TIME = 0.1
 
 const Home: NextPage = () => {
     const seekerRef = useRef<HTMLSpanElement>(null)
@@ -145,7 +146,7 @@ const Home: NextPage = () => {
 
             while (
                 nextNoteTimeRef.current <
-                audioContextRef.current.currentTime + 0.1
+                audioContextRef.current.currentTime + SCHEDULE_AHEAD_TIME
             ) {
                 const { current: audioContext } = audioContextRef
                 const osc = audioContext.createOscillator()
