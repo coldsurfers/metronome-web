@@ -132,6 +132,17 @@ const Home: NextPage = () => {
         )
     }, [bpm])
 
+    const nextBeat = useCallback(() => {
+        const secondsPerBeat = 60 / bpm
+        nextNoteTimeRef.current += secondsPerBeat
+
+        if (currentBeatInBarRef.current + 1 === BEATS_PER_BAR) {
+            currentBeatInBarRef.current = 0
+        } else {
+            currentBeatInBarRef.current += 1
+        }
+    }, [bpm])
+
     const onClickPlay = useCallback(() => {
         setIsPlaying(true)
 
@@ -143,7 +154,6 @@ const Home: NextPage = () => {
 
         intervalRef.current = setInterval(() => {
             if (!audioContextRef.current) return
-
             while (
                 nextNoteTimeRef.current <
                 audioContextRef.current.currentTime + SCHEDULE_AHEAD_TIME
@@ -172,17 +182,10 @@ const Home: NextPage = () => {
                 osc.start(nextNoteTimeRef.current)
                 osc.stop(nextNoteTimeRef.current + 0.03)
 
-                const secondsPerBeat = 60 / bpm
-                nextNoteTimeRef.current += secondsPerBeat
-
-                if (currentBeatInBarRef.current + 1 === BEATS_PER_BAR) {
-                    currentBeatInBarRef.current = 0
-                } else {
-                    currentBeatInBarRef.current += 1
-                }
+                nextBeat()
             }
         }, LOOK_AHEAD)
-    }, [bpm])
+    }, [nextBeat])
 
     const onClickPause = useCallback(() => {
         setIsPlaying(false)
