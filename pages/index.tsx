@@ -143,6 +143,31 @@ const Home: NextPage = () => {
         }
     }, [bpm])
 
+    const scheduleNote = useCallback(() => {
+        const { current: audioContext } = audioContextRef
+        if (!audioContext) return
+        const osc = audioContext.createOscillator()
+        const envelope = audioContext.createGain()
+
+        osc.frequency.value =
+            currentBeatInBarRef.current % BEATS_PER_BAR === 0 ? 1000 : 800
+        envelope.gain.value = 1
+        envelope.gain.exponentialRampToValueAtTime(
+            1,
+            nextNoteTimeRef.current + 0.001
+        )
+        envelope.gain.exponentialRampToValueAtTime(
+            0.001,
+            nextNoteTimeRef.current + 0.02
+        )
+
+        osc.connect(envelope)
+        envelope.connect(audioContext.destination)
+
+        osc.start(nextNoteTimeRef.current)
+        osc.stop(nextNoteTimeRef.current + 0.03)
+    }, [])
+
     const onClickPlay = useCallback(() => {
         setIsPlaying(true)
 
@@ -158,34 +183,11 @@ const Home: NextPage = () => {
                 nextNoteTimeRef.current <
                 audioContextRef.current.currentTime + SCHEDULE_AHEAD_TIME
             ) {
-                const { current: audioContext } = audioContextRef
-                const osc = audioContext.createOscillator()
-                const envelope = audioContext.createGain()
-
-                osc.frequency.value =
-                    currentBeatInBarRef.current % BEATS_PER_BAR === 0
-                        ? 1000
-                        : 800
-                envelope.gain.value = 1
-                envelope.gain.exponentialRampToValueAtTime(
-                    1,
-                    nextNoteTimeRef.current + 0.001
-                )
-                envelope.gain.exponentialRampToValueAtTime(
-                    0.001,
-                    nextNoteTimeRef.current + 0.02
-                )
-
-                osc.connect(envelope)
-                envelope.connect(audioContext.destination)
-
-                osc.start(nextNoteTimeRef.current)
-                osc.stop(nextNoteTimeRef.current + 0.03)
-
+                scheduleNote()
                 nextBeat()
             }
         }, LOOK_AHEAD)
-    }, [nextBeat])
+    }, [nextBeat, scheduleNote])
 
     const onClickPause = useCallback(() => {
         setIsPlaying(false)
