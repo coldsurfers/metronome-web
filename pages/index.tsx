@@ -92,17 +92,85 @@ const BpmMarker = styled.h1`
 
 const MINIMUM_BPM = 20
 const MAXIMUM_BPM = 240
+const BEATS_PER_BAR = 4
+const LOOK_AHEAD = 25
+const SCHEDULE_AHEAD_TIME = 0.1
 
 const Home: NextPage = () => {
     const seekerRef = useRef<HTMLSpanElement>(null)
     const seekBarRef = useRef<HTMLDivElement>(null)
     const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
+    const currentBeatInBarRef = useRef<number>(0)
+    const nextNoteTimeRef = useRef<number>(0)
+    const audioContextRef = useRef<AudioContext | null>(null)
+
     const [isSeeking, setIsSeeking] = useState<boolean>(false)
     const [seekerLeftPercentage, setSeekerLeftPercentage] = useState<number>(50)
     const [bpm, setBpm] = useState<number>(
         MINIMUM_BPM + (seekerLeftPercentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
     )
     const [isPlaying, setIsPlaying] = useState<boolean>(false)
+
+    const nextBeat = useCallback(() => {
+        const secondsPerBeat = 60 / bpm
+        nextNoteTimeRef.current += secondsPerBeat
+
+        if (currentBeatInBarRef.current + 1 === BEATS_PER_BAR) {
+            currentBeatInBarRef.current = 0
+        } else {
+            currentBeatInBarRef.current += 1
+        }
+    }, [bpm])
+
+    const scheduleNote = useCallback((beatNumber: number, time: number) => {
+        const { current: audioContext } = audioContextRef
+        if (!audioContext) return
+        const osc = audioContext.createOscillator()
+        const envelope = audioContext.createGain()
+
+        osc.frequency.value = beatNumber % BEATS_PER_BAR === 0 ? 1000 : 800
+        envelope.gain.value = 1
+        envelope.gain.exponentialRampToValueAtTime(1, time + 0.001)
+        envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.02)
+
+        osc.connect(envelope)
+        envelope.connect(audioContext.destination)
+
+        osc.start(time)
+        osc.stop(time + 0.03)
+    }, [])
+
+    const onClickPlay = useCallback(() => {
+        setIsPlaying(true)
+
+        if (!audioContextRef.current) {
+            audioContextRef.current = new (window.AudioContext ||
+                window.webkitAudioContext)()
+        }
+        nextNoteTimeRef.current = audioContextRef.current.currentTime + 0.05
+
+        intervalRef.current = setInterval(() => {
+            if (!audioContextRef.current) return
+            while (
+                nextNoteTimeRef.current <
+                audioContextRef.current.currentTime + SCHEDULE_AHEAD_TIME
+            ) {
+                scheduleNote(
+                    currentBeatInBarRef.current,
+                    nextNoteTimeRef.current
+                )
+                nextBeat()
+            }
+        }, LOOK_AHEAD)
+    }, [nextBeat, scheduleNote])
+
+    const onClickPause = useCallback(() => {
+        setIsPlaying(false)
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+        }
+    }, [])
 
     const onClickBpmPlus = useCallback(() => {
         const nextBpm = bpm + 1
@@ -113,7 +181,11 @@ const Home: NextPage = () => {
         setSeekerLeftPercentage(
             ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
         )
-    }, [bpm])
+        if (isPlaying) {
+            onClickPause()
+        }
+    }, [bpm, isPlaying, onClickPause])
+
     const onClickBpmMinus = useCallback(() => {
         const nextBpm = bpm - 1
         if (nextBpm < MINIMUM_BPM) {
@@ -123,35 +195,16 @@ const Home: NextPage = () => {
         setSeekerLeftPercentage(
             ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
         )
-    }, [bpm])
-    const onClickPlay = useCallback(() => {
-        setIsPlaying(true)
-
-        const ms = 60000 / bpm
-        intervalRef.current = setInterval(() => {
-            const audioContext = new window.AudioContext()
-            const osc = audioContext.createOscillator()
-            const envelope = audioContext.createGain()
-            osc.frequency.value = 1000
-            envelope.gain.value = 1
-
-            osc.connect(envelope)
-            envelope.connect(audioContext.destination)
-            osc.start(0)
-            osc.stop(0 + 0.03)
-        }, ms)
-    }, [bpm])
-    const onClickPause = useCallback(() => {
-        setIsPlaying(false)
-        if (intervalRef.current) {
-            clearInterval(intervalRef.current)
-            intervalRef.current = null
+        if (isPlaying) {
+            onClickPause()
         }
-    }, [])
+    }, [bpm, isPlaying, onClickPause])
+
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
                 setIsSeeking(true)
+                onClickPause()
             }
         }
         const onMouseMove = (e: MouseEvent) => {
@@ -179,6 +232,7 @@ const Home: NextPage = () => {
         const onMouseUp = () => {
             if (isSeeking) {
                 setIsSeeking(false)
+                onClickPlay()
             }
         }
         document.addEventListener('mousedown', onMouseDown)
@@ -190,7 +244,7 @@ const Home: NextPage = () => {
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseup', onMouseUp)
         }
-    }, [isSeeking])
+    }, [isSeeking, onClickPause, onClickPlay])
 
     return (
         <Layout>
