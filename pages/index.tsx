@@ -129,7 +129,8 @@ const Home: NextPage = () => {
 
         const ms = 60000 / bpm
         intervalRef.current = setInterval(() => {
-            const audioContext = new window.AudioContext()
+            const audioContext = new (window.AudioContext ||
+                window.webkitAudioContext)()
             const osc = audioContext.createOscillator()
             const envelope = audioContext.createGain()
             osc.frequency.value = 1000
