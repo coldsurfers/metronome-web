@@ -196,6 +196,7 @@ const Home: NextPage = () => {
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
                 setIsSeeking(true)
+                onClickPause()
             }
         }
         const onMouseMove = (e: MouseEvent) => {
@@ -223,6 +224,7 @@ const Home: NextPage = () => {
         const onMouseUp = () => {
             if (isSeeking) {
                 setIsSeeking(false)
+                onClickPlay()
             }
         }
         document.addEventListener('mousedown', onMouseDown)
@@ -234,7 +236,7 @@ const Home: NextPage = () => {
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseup', onMouseUp)
         }
-    }, [isSeeking])
+    }, [isSeeking, onClickPause, onClickPlay])
 
     return (
         <Layout>
