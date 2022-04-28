@@ -111,27 +111,6 @@ const Home: NextPage = () => {
     )
     const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
-    const onClickBpmPlus = useCallback(() => {
-        const nextBpm = bpm + 1
-        if (nextBpm > MAXIMUM_BPM) {
-            return
-        }
-        setBpm(nextBpm)
-        setSeekerLeftPercentage(
-            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
-        )
-    }, [bpm])
-    const onClickBpmMinus = useCallback(() => {
-        const nextBpm = bpm - 1
-        if (nextBpm < MINIMUM_BPM) {
-            return
-        }
-        setBpm(nextBpm)
-        setSeekerLeftPercentage(
-            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
-        )
-    }, [bpm])
-
     const nextBeat = useCallback(() => {
         const secondsPerBeat = 60 / bpm
         nextNoteTimeRef.current += secondsPerBeat
@@ -192,6 +171,35 @@ const Home: NextPage = () => {
             intervalRef.current = null
         }
     }, [])
+
+    const onClickBpmPlus = useCallback(() => {
+        const nextBpm = bpm + 1
+        if (nextBpm > MAXIMUM_BPM) {
+            return
+        }
+        setBpm(nextBpm)
+        setSeekerLeftPercentage(
+            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
+        )
+        if (isPlaying) {
+            onClickPause()
+        }
+    }, [bpm, isPlaying, onClickPause])
+
+    const onClickBpmMinus = useCallback(() => {
+        const nextBpm = bpm - 1
+        if (nextBpm < MINIMUM_BPM) {
+            return
+        }
+        setBpm(nextBpm)
+        setSeekerLeftPercentage(
+            ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
+        )
+        if (isPlaying) {
+            onClickPause()
+        }
+    }, [bpm, isPlaying, onClickPause])
+
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
