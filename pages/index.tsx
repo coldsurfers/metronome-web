@@ -92,6 +92,7 @@ const BpmMarker = styled.h1`
 
 const MINIMUM_BPM = 20
 const MAXIMUM_BPM = 240
+const BEATS_PER_BAR = 4
 
 const Home: NextPage = () => {
     const seekerRef = useRef<HTMLSpanElement>(null)
@@ -102,6 +103,7 @@ const Home: NextPage = () => {
     const [bpm, setBpm] = useState<number>(
         MINIMUM_BPM + (seekerLeftPercentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
     )
+    const currentBeatInBarRef = useRef<number>(0)
     const [isPlaying, setIsPlaying] = useState<boolean>(false)
 
     const onClickBpmPlus = useCallback(() => {
@@ -124,6 +126,7 @@ const Home: NextPage = () => {
             ((nextBpm - MINIMUM_BPM) / (MAXIMUM_BPM - MINIMUM_BPM)) * 100
         )
     }, [bpm])
+
     const onClickPlay = useCallback(() => {
         setIsPlaying(true)
 
@@ -131,17 +134,30 @@ const Home: NextPage = () => {
         intervalRef.current = setInterval(() => {
             const audioContext = new (window.AudioContext ||
                 window.webkitAudioContext)()
+
             const osc = audioContext.createOscillator()
             const envelope = audioContext.createGain()
-            osc.frequency.value = 1000
+
+            osc.frequency.value =
+                currentBeatInBarRef.current % BEATS_PER_BAR === 0 ? 1000 : 800
             envelope.gain.value = 1
+            // envelope.gain.exponentialRampToValueAtTime(1, 0.001)
+            // envelope.gain.exponentialRampToValueAtTime(0.001, 0.02)
 
             osc.connect(envelope)
             envelope.connect(audioContext.destination)
+
             osc.start(0)
             osc.stop(0 + 0.03)
+
+            if (currentBeatInBarRef.current + 1 === BEATS_PER_BAR) {
+                currentBeatInBarRef.current = 0
+            } else {
+                currentBeatInBarRef.current += 1
+            }
         }, ms)
     }, [bpm])
+
     const onClickPause = useCallback(() => {
         setIsPlaying(false)
         if (intervalRef.current) {
