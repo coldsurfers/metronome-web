@@ -143,29 +143,22 @@ const Home: NextPage = () => {
         }
     }, [bpm])
 
-    const scheduleNote = useCallback(() => {
+    const scheduleNote = useCallback((beatNumber: number, time: number) => {
         const { current: audioContext } = audioContextRef
         if (!audioContext) return
         const osc = audioContext.createOscillator()
         const envelope = audioContext.createGain()
 
-        osc.frequency.value =
-            currentBeatInBarRef.current % BEATS_PER_BAR === 0 ? 1000 : 800
+        osc.frequency.value = beatNumber % BEATS_PER_BAR === 0 ? 1000 : 800
         envelope.gain.value = 1
-        envelope.gain.exponentialRampToValueAtTime(
-            1,
-            nextNoteTimeRef.current + 0.001
-        )
-        envelope.gain.exponentialRampToValueAtTime(
-            0.001,
-            nextNoteTimeRef.current + 0.02
-        )
+        envelope.gain.exponentialRampToValueAtTime(1, time + 0.001)
+        envelope.gain.exponentialRampToValueAtTime(0.001, time + 0.02)
 
         osc.connect(envelope)
         envelope.connect(audioContext.destination)
 
-        osc.start(nextNoteTimeRef.current)
-        osc.stop(nextNoteTimeRef.current + 0.03)
+        osc.start(time)
+        osc.stop(time + 0.03)
     }, [])
 
     const onClickPlay = useCallback(() => {
@@ -183,7 +176,10 @@ const Home: NextPage = () => {
                 nextNoteTimeRef.current <
                 audioContextRef.current.currentTime + SCHEDULE_AHEAD_TIME
             ) {
-                scheduleNote()
+                scheduleNote(
+                    currentBeatInBarRef.current,
+                    nextNoteTimeRef.current
+                )
                 nextBeat()
             }
         }, LOOK_AHEAD)
