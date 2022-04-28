@@ -94,15 +94,16 @@ const MINIMUM_BPM = 20
 const MAXIMUM_BPM = 240
 
 const Home: NextPage = () => {
-    const audioRef = useRef<HTMLAudioElement>(null)
     const seekerRef = useRef<HTMLSpanElement>(null)
     const seekBarRef = useRef<HTMLDivElement>(null)
+    const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
     const [isSeeking, setIsSeeking] = useState<boolean>(false)
     const [seekerLeftPercentage, setSeekerLeftPercentage] = useState<number>(50)
     const [bpm, setBpm] = useState<number>(
         MINIMUM_BPM + (seekerLeftPercentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
     )
     const [isPlaying, setIsPlaying] = useState<boolean>(false)
+
     const onClickBpmPlus = useCallback(() => {
         const nextBpm = bpm + 1
         if (nextBpm > MAXIMUM_BPM) {
@@ -125,13 +126,27 @@ const Home: NextPage = () => {
     }, [bpm])
     const onClickPlay = useCallback(() => {
         setIsPlaying(true)
+
         const ms = 60000 / bpm
-        setInterval(() => {
-            audioRef.current?.play()
+        intervalRef.current = setInterval(() => {
+            const audioContext = new window.AudioContext()
+            const osc = audioContext.createOscillator()
+            const envelope = audioContext.createGain()
+            osc.frequency.value = 1000
+            envelope.gain.value = 1
+
+            osc.connect(envelope)
+            envelope.connect(audioContext.destination)
+            osc.start(0)
+            osc.stop(0 + 0.03)
         }, ms)
     }, [bpm])
     const onClickPause = useCallback(() => {
         setIsPlaying(false)
+        if (intervalRef.current) {
+            clearInterval(intervalRef.current)
+            intervalRef.current = null
+        }
     }, [])
     useEffect(() => {
         const onMouseDown = (e: MouseEvent) => {
@@ -201,18 +216,7 @@ const Home: NextPage = () => {
                 <PlayButton onClick={isPlaying ? onClickPause : onClickPlay}>
                     {isPlaying ? 'Pause' : 'Play'}
                 </PlayButton>
-                {/* <button
-                    type="button"
-                    onClick={() => {
-                        setInterval(() => {
-                            audioRef.current?.play()
-                        }, 1000)
-                    }}
-                >
-                    Play
-                </button> */}
             </ToolBox>
-            <audio ref={audioRef} src="/tick.mp3" />
         </Layout>
     )
 }
