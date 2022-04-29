@@ -214,7 +214,7 @@ const Home: NextPage = () => {
     }, [bpm, isPlaying, onClickPause])
 
     useEffect(() => {
-        const control = (e: MouseEvent) => {
+        const controlMouse = (e: MouseEvent) => {
             const { current: seekBarRefCurrent } = seekBarRef
             if (!seekBarRefCurrent) {
                 return
@@ -233,16 +233,48 @@ const Home: NextPage = () => {
                 MINIMUM_BPM + (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
             )
         }
+        const controlTouch = (e: TouchEvent) => {
+            const { current: seekBarRefCurrent } = seekBarRef
+            if (!seekBarRefCurrent) {
+                return
+            }
+            const { clientWidth, offsetLeft } = seekBarRefCurrent
+            let percentage =
+                ((e.touches[0].clientX - offsetLeft) / clientWidth) * 100
+            if (percentage < 0) {
+                percentage = 0
+            }
+            if (percentage > 100) {
+                percentage = 100
+            }
+
+            setSeekerLeftPercentage(percentage)
+            setBpm(
+                MINIMUM_BPM + (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
+            )
+        }
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
                 setIsSeeking(true)
                 onClickPause()
-                control(e)
+                controlMouse(e)
+            }
+        }
+        const onTouchStart = (e: TouchEvent) => {
+            if (seekBarRef.current?.contains(e.target as Node)) {
+                setIsSeeking(true)
+                onClickPause()
+                controlTouch(e)
             }
         }
         const onMouseMove = (e: MouseEvent) => {
             if (isSeeking) {
-                control(e)
+                controlMouse(e)
+            }
+        }
+        const onTouchMove = (e: TouchEvent) => {
+            if (isSeeking) {
+                controlTouch(e)
             }
         }
         const onMouseUp = () => {
@@ -267,12 +299,18 @@ const Home: NextPage = () => {
         document.addEventListener('mousedown', onMouseDown)
         document.addEventListener('mousemove', onMouseMove)
         document.addEventListener('mouseup', onMouseUp)
+        document.addEventListener('touchstart', onTouchStart)
+        document.addEventListener('touchmove', onTouchMove)
+        document.addEventListener('touchend', onMouseUp)
         document.addEventListener('keypress', onKeyPress)
 
         return () => {
             document.removeEventListener('mousedown', onMouseDown)
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseup', onMouseUp)
+            document.removeEventListener('touchstart', onTouchStart)
+            document.removeEventListener('touchmove', onTouchMove)
+            document.removeEventListener('touchend', onMouseUp)
             document.removeEventListener('keypress', onKeyPress)
         }
     }, [isSeeking, onClickPause, onClickPlay, isPlaying])
