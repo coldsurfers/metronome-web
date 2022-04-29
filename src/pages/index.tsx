@@ -235,16 +235,28 @@ const Home: NextPage = () => {
                 onClickPlay()
             }
         }
+        const onKeyPress = (e: KeyboardEvent) => {
+            if (e.key === ' ') {
+                if (isPlaying) {
+                    onClickPause()
+                } else {
+                    onClickPlay()
+                }
+            }
+        }
+
         document.addEventListener('mousedown', onMouseDown)
         document.addEventListener('mousemove', onMouseMove)
         document.addEventListener('mouseup', onMouseUp)
+        document.addEventListener('keypress', onKeyPress)
 
         return () => {
             document.removeEventListener('mousedown', onMouseDown)
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseup', onMouseUp)
+            document.removeEventListener('keypress', onKeyPress)
         }
-    }, [isSeeking, onClickPause, onClickPlay])
+    }, [isSeeking, onClickPause, onClickPlay, isPlaying])
 
     return (
         <Layout>
