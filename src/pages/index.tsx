@@ -84,8 +84,8 @@ const Seeker = styled.span`
 `
 
 const BpmMarker = styled.h1`
-    font-weight: bold;
-    font-size: 44px;
+    font-weight: 500;
+    font-size: 120px;
     width: 100%;
     text-align: center;
 `

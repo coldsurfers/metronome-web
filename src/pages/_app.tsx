@@ -8,6 +8,7 @@ function MyApp({ Component, pageProps }: AppProps) {
             <Component {...pageProps} />
             <Global
                 styles={css`
+                    @import url('//fonts.googleapis.com/css2?family=Water+Brush&display=swap');
                     ${emotionReset}
 
                     *, *::after, *::before {
@@ -15,6 +16,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                         -moz-osx-font-smoothing: grayscale;
                         -webkit-font-smoothing: antialiased;
                         font-smoothing: antialiased;
+                    }
+
+                    body {
+                        font-family: 'Water Brush', cursive;
                     }
                 `}
             />
