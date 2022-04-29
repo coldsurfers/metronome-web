@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -53,8 +52,8 @@ const CircleButton = styled.button`
 `
 
 const PlayButton = styled(CircleButton)`
-    width: 180px;
-    height: 180px;
+    width: 120px;
+    height: 120px;
     margin-left: auto;
     margin-right: auto;
     margin-top: auto;
