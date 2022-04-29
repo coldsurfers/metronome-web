@@ -103,6 +103,7 @@ const Home: NextPage = () => {
     const currentBeatInBarRef = useRef<number>(0)
     const nextNoteTimeRef = useRef<number>(0)
     const audioContextRef = useRef<AudioContext | null>(null)
+    const playPauseButtonRef = useRef<HTMLButtonElement>(null)
 
     const [isSeeking, setIsSeeking] = useState<boolean>(false)
     const [seekerLeftPercentage, setSeekerLeftPercentage] = useState<number>(50)
@@ -240,6 +241,9 @@ const Home: NextPage = () => {
         }
         const onKeyPress = (e: KeyboardEvent) => {
             if (e.key === ' ') {
+                if (document.activeElement === playPauseButtonRef.current) {
+                    return
+                }
                 if (isPlaying) {
                     onClickPause()
                 } else {
@@ -282,7 +286,10 @@ const Home: NextPage = () => {
                         +
                     </CircleButton>
                 </SeekBarLayout>
-                <PlayButton onClick={isPlaying ? onClickPause : onClickPlay}>
+                <PlayButton
+                    ref={playPauseButtonRef}
+                    onClick={isPlaying ? onClickPause : onClickPlay}
+                >
                     {isPlaying ? <PauseIcon /> : <PlayIcon />}
                 </PlayButton>
             </ToolBox>
