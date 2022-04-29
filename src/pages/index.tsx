@@ -201,32 +201,35 @@ const Home: NextPage = () => {
     }, [bpm, isPlaying, onClickPause])
 
     useEffect(() => {
+        const control = (e: MouseEvent) => {
+            const { current: seekBarRefCurrent } = seekBarRef
+            if (!seekBarRefCurrent) {
+                return
+            }
+            const { clientWidth, offsetLeft } = seekBarRefCurrent
+            let percentage = ((e.clientX - offsetLeft) / clientWidth) * 100
+            if (percentage < 0) {
+                percentage = 0
+            }
+            if (percentage > 100) {
+                percentage = 100
+            }
+
+            setSeekerLeftPercentage(percentage)
+            setBpm(
+                MINIMUM_BPM + (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
+            )
+        }
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
                 setIsSeeking(true)
                 onClickPause()
+                control(e)
             }
         }
         const onMouseMove = (e: MouseEvent) => {
             if (isSeeking) {
-                const { current: seekBarRefCurrent } = seekBarRef
-                if (!seekBarRefCurrent) {
-                    return
-                }
-                const { clientWidth, offsetLeft } = seekBarRefCurrent
-                let percentage = ((e.clientX - offsetLeft) / clientWidth) * 100
-                if (percentage < 0) {
-                    percentage = 0
-                }
-                if (percentage > 100) {
-                    percentage = 100
-                }
-
-                setSeekerLeftPercentage(percentage)
-                setBpm(
-                    MINIMUM_BPM +
-                        (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
-                )
+                control(e)
             }
         }
         const onMouseUp = () => {
