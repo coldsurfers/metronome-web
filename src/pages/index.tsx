@@ -11,7 +11,7 @@ const Layout = styled.main`
     justify-content: center;
 `
 
-const ToolBox = styled.div`
+const ToolBox = styled.div<{ bpm: number }>`
     width: 680px;
     background-color: #f1f3f5;
 
@@ -22,6 +22,19 @@ const ToolBox = styled.div`
 
     display: flex;
     flex-direction: column;
+
+    &.pulse {
+        animation: ${(p) => `pulse-animation ${60 / p.bpm}s infinite`};
+    }
+
+    @keyframes pulse-animation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+        }
+        100% {
+            box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
+        }
+    }
 `
 
 const SeekBarLayout = styled.div`
@@ -266,7 +279,7 @@ const Home: NextPage = () => {
 
     return (
         <Layout>
-            <ToolBox>
+            <ToolBox className={isPlaying ? 'pulse' : undefined} bpm={bpm}>
                 <BpmMarker>{Math.ceil(bpm)}</BpmMarker>
                 <SeekBarLayout>
                     <CircleButton onClick={onClickBpmMinus}>&lt;</CircleButton>
