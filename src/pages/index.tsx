@@ -2,6 +2,8 @@
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import PauseIcon from '../icons/PauseIcon'
+import PlayIcon from '../icons/PlayIcon'
 
 const Layout = styled.main`
     min-width: 100vw;
@@ -267,7 +269,7 @@ const Home: NextPage = () => {
                     </CircleButton>
                 </SeekBarLayout>
                 <PlayButton onClick={isPlaying ? onClickPause : onClickPlay}>
-                    {isPlaying ? 'Pause' : 'Play'}
+                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
                 </PlayButton>
             </ToolBox>
         </Layout>
