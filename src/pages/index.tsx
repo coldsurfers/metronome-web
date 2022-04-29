@@ -1,4 +1,3 @@
-/* eslint-disable jsx-a11y/media-has-caption */
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
@@ -12,9 +11,8 @@ const Layout = styled.main`
     justify-content: center;
 `
 
-const ToolBox = styled.div`
+const ToolBox = styled.div<{ bpm: number }>`
     width: 680px;
-    height: 450px;
     background-color: #f1f3f5;
 
     border-radius: 8px;
@@ -24,6 +22,19 @@ const ToolBox = styled.div`
 
     display: flex;
     flex-direction: column;
+
+    &.pulse {
+        animation: ${(p) => `pulse-animation ${60 / p.bpm}s infinite`};
+    }
+
+    @keyframes pulse-animation {
+        0% {
+            box-shadow: 0 0 0 0px rgba(0, 0, 0, 0.2);
+        }
+        100% {
+            box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
+        }
+    }
 `
 
 const SeekBarLayout = styled.div`
@@ -52,11 +63,12 @@ const CircleButton = styled.button`
 `
 
 const PlayButton = styled(CircleButton)`
-    width: 180px;
-    height: 180px;
+    width: 120px;
+    height: 120px;
     margin-left: auto;
     margin-right: auto;
     margin-top: auto;
+    font-size: 23px;
 `
 
 const SeekBar = styled.div`
@@ -84,8 +96,8 @@ const Seeker = styled.span`
 `
 
 const BpmMarker = styled.h1`
-    font-weight: bold;
-    font-size: 44px;
+    font-weight: 500;
+    font-size: 120px;
     width: 100%;
     text-align: center;
 `
@@ -103,6 +115,7 @@ const Home: NextPage = () => {
     const currentBeatInBarRef = useRef<number>(0)
     const nextNoteTimeRef = useRef<number>(0)
     const audioContextRef = useRef<AudioContext | null>(null)
+    const playPauseButtonRef = useRef<HTMLButtonElement>(null)
 
     const [isSeeking, setIsSeeking] = useState<boolean>(false)
     const [seekerLeftPercentage, setSeekerLeftPercentage] = useState<number>(50)
@@ -201,32 +214,35 @@ const Home: NextPage = () => {
     }, [bpm, isPlaying, onClickPause])
 
     useEffect(() => {
+        const control = (e: MouseEvent) => {
+            const { current: seekBarRefCurrent } = seekBarRef
+            if (!seekBarRefCurrent) {
+                return
+            }
+            const { clientWidth, offsetLeft } = seekBarRefCurrent
+            let percentage = ((e.clientX - offsetLeft) / clientWidth) * 100
+            if (percentage < 0) {
+                percentage = 0
+            }
+            if (percentage > 100) {
+                percentage = 100
+            }
+
+            setSeekerLeftPercentage(percentage)
+            setBpm(
+                MINIMUM_BPM + (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
+            )
+        }
         const onMouseDown = (e: MouseEvent) => {
             if (seekBarRef.current?.contains(e.target as Node)) {
                 setIsSeeking(true)
                 onClickPause()
+                control(e)
             }
         }
         const onMouseMove = (e: MouseEvent) => {
             if (isSeeking) {
-                const { current: seekBarRefCurrent } = seekBarRef
-                if (!seekBarRefCurrent) {
-                    return
-                }
-                const { clientWidth, offsetLeft } = seekBarRefCurrent
-                let percentage = ((e.clientX - offsetLeft) / clientWidth) * 100
-                if (percentage < 0) {
-                    percentage = 0
-                }
-                if (percentage > 100) {
-                    percentage = 100
-                }
-
-                setSeekerLeftPercentage(percentage)
-                setBpm(
-                    MINIMUM_BPM +
-                        (percentage / 100) * (MAXIMUM_BPM - MINIMUM_BPM)
-                )
+                control(e)
             }
         }
         const onMouseUp = () => {
@@ -235,23 +251,38 @@ const Home: NextPage = () => {
                 onClickPlay()
             }
         }
+        const onKeyPress = (e: KeyboardEvent) => {
+            if (e.key === ' ') {
+                if (document.activeElement === playPauseButtonRef.current) {
+                    return
+                }
+                if (isPlaying) {
+                    onClickPause()
+                } else {
+                    onClickPlay()
+                }
+            }
+        }
+
         document.addEventListener('mousedown', onMouseDown)
         document.addEventListener('mousemove', onMouseMove)
         document.addEventListener('mouseup', onMouseUp)
+        document.addEventListener('keypress', onKeyPress)
 
         return () => {
             document.removeEventListener('mousedown', onMouseDown)
             document.removeEventListener('mousemove', onMouseMove)
             document.removeEventListener('mouseup', onMouseUp)
+            document.removeEventListener('keypress', onKeyPress)
         }
-    }, [isSeeking, onClickPause, onClickPlay])
+    }, [isSeeking, onClickPause, onClickPlay, isPlaying])
 
     return (
         <Layout>
-            <ToolBox>
+            <ToolBox className={isPlaying ? 'pulse' : undefined} bpm={bpm}>
                 <BpmMarker>{Math.ceil(bpm)}</BpmMarker>
                 <SeekBarLayout>
-                    <CircleButton onClick={onClickBpmMinus}>-</CircleButton>
+                    <CircleButton onClick={onClickBpmMinus}>&lt;</CircleButton>
                     <SeekBar ref={seekBarRef}>
                         <Seeker
                             ref={seekerRef}
@@ -264,11 +295,14 @@ const Home: NextPage = () => {
                         onClick={onClickBpmPlus}
                         style={{ marginLeft: 'auto' }}
                     >
-                        +
+                        &gt;
                     </CircleButton>
                 </SeekBarLayout>
-                <PlayButton onClick={isPlaying ? onClickPause : onClickPlay}>
-                    {isPlaying ? 'Pause' : 'Play'}
+                <PlayButton
+                    ref={playPauseButtonRef}
+                    onClick={isPlaying ? onClickPause : onClickPlay}
+                >
+                    {isPlaying ? 'Stop' : 'Start'}
                 </PlayButton>
             </ToolBox>
         </Layout>
