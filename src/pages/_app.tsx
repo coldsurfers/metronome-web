@@ -21,6 +21,10 @@ function MyApp({ Component, pageProps }: AppProps) {
                     body {
                         font-family: 'Water Brush', cursive;
                     }
+
+                    button {
+                        font-family: 'Water Brush', cursive;
+                    }
                 `}
             />
         </>

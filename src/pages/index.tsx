@@ -1,8 +1,6 @@
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
-import PauseIcon from '../icons/PauseIcon'
-import PlayIcon from '../icons/PlayIcon'
 
 const Layout = styled.main`
     min-width: 100vw;
@@ -57,6 +55,7 @@ const PlayButton = styled(CircleButton)`
     margin-left: auto;
     margin-right: auto;
     margin-top: auto;
+    font-size: 23px;
 `
 
 const SeekBar = styled.div`
@@ -270,7 +269,7 @@ const Home: NextPage = () => {
             <ToolBox>
                 <BpmMarker>{Math.ceil(bpm)}</BpmMarker>
                 <SeekBarLayout>
-                    <CircleButton onClick={onClickBpmMinus}>-</CircleButton>
+                    <CircleButton onClick={onClickBpmMinus}>&lt;</CircleButton>
                     <SeekBar ref={seekBarRef}>
                         <Seeker
                             ref={seekerRef}
@@ -283,14 +282,14 @@ const Home: NextPage = () => {
                         onClick={onClickBpmPlus}
                         style={{ marginLeft: 'auto' }}
                     >
-                        +
+                        &gt;
                     </CircleButton>
                 </SeekBarLayout>
                 <PlayButton
                     ref={playPauseButtonRef}
                     onClick={isPlaying ? onClickPause : onClickPlay}
                 >
-                    {isPlaying ? <PauseIcon /> : <PlayIcon />}
+                    {isPlaying ? 'Stop' : 'Start'}
                 </PlayButton>
             </ToolBox>
         </Layout>
