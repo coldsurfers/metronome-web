@@ -14,7 +14,6 @@ const Layout = styled.main`
 
 const ToolBox = styled.div`
     width: 680px;
-    height: 450px;
     background-color: #f1f3f5;
 
     border-radius: 8px;
