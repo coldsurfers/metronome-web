@@ -12,16 +12,17 @@ const Layout = styled.main`
 `
 
 const ToolBox = styled.div<{ bpm: number }>`
-    width: 680px;
+    width: 450px;
+    height: 450px;
+    border-radius: 50%;
     background-color: #f1f3f5;
-
-    border-radius: 8px;
     box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
 
     padding: 24px;
 
     display: flex;
     flex-direction: column;
+    justify-content: center;
 
     &.pulse {
         animation: ${(p) => `pulse-animation ${60 / p.bpm}s infinite`};
@@ -67,7 +68,6 @@ const PlayButton = styled(CircleButton)`
     height: 120px;
     margin-left: auto;
     margin-right: auto;
-    margin-top: auto;
     font-size: 23px;
 `
 
@@ -100,6 +100,7 @@ const BpmMarker = styled.h1`
     font-size: 120px;
     width: 100%;
     text-align: center;
+    user-select: none;
 `
 
 const MINIMUM_BPM = 20
@@ -280,7 +281,6 @@ const Home: NextPage = () => {
         const onMouseUp = () => {
             if (isSeeking) {
                 setIsSeeking(false)
-                onClickPlay()
             }
         }
         const onKeyPress = (e: KeyboardEvent) => {
