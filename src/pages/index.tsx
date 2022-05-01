@@ -100,6 +100,7 @@ const BpmMarker = styled.h1`
     font-size: 120px;
     width: 100%;
     text-align: center;
+    user-select: none;
 `
 
 const MINIMUM_BPM = 20
