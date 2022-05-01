@@ -281,7 +281,6 @@ const Home: NextPage = () => {
         const onMouseUp = () => {
             if (isSeeking) {
                 setIsSeeking(false)
-                onClickPlay()
             }
         }
         const onKeyPress = (e: KeyboardEvent) => {
