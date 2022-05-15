@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import media from '../lib/media'
 
 const Layout = styled.main`
     min-width: 100vw;
@@ -36,6 +37,12 @@ const ToolBox = styled.div<{ bpm: number }>`
             box-shadow: 0 0 0 20px rgba(0, 0, 0, 0);
         }
     }
+
+    ${media.medium} {
+        width: 300px;
+        height: 300px;
+        font-size: 17px;
+    }
 `
 
 const SeekBarLayout = styled.div`
@@ -61,6 +68,12 @@ const CircleButton = styled.button`
         background-color: #495057;
         color: #ffffff;
     }
+
+    ${media.medium} {
+        width: 30px;
+        height: 30px;
+        font-size: 14px;
+    }
 `
 
 const PlayButton = styled(CircleButton)`
@@ -69,6 +82,12 @@ const PlayButton = styled(CircleButton)`
     margin-left: auto;
     margin-right: auto;
     font-size: 23px;
+
+    ${media.medium} {
+        width: 80px;
+        height: 80px;
+        font-size: 17px;
+    }
 `
 
 const SeekBar = styled.div`
@@ -101,6 +120,10 @@ const BpmMarker = styled.h1`
     width: 100%;
     text-align: center;
     user-select: none;
+
+    ${media.medium} {
+        font-size: 70px;
+    }
 `
 
 const MINIMUM_BPM = 20
