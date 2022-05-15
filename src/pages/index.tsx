@@ -1,6 +1,7 @@
 import styled from '@emotion/styled'
 import type { NextPage } from 'next'
 import { useCallback, useEffect, useRef, useState } from 'react'
+import media from '../lib/media'
 
 const Layout = styled.main`
     min-width: 100vw;
@@ -37,7 +38,7 @@ const ToolBox = styled.div<{ bpm: number }>`
         }
     }
 
-    @media (max-width: 450px) {
+    ${media.medium} {
         width: 300px;
         height: 300px;
         font-size: 17px;
@@ -68,7 +69,7 @@ const CircleButton = styled.button`
         color: #ffffff;
     }
 
-    @media (max-width: 450px) {
+    ${media.medium} {
         width: 30px;
         height: 30px;
         font-size: 14px;
@@ -82,7 +83,7 @@ const PlayButton = styled(CircleButton)`
     margin-right: auto;
     font-size: 23px;
 
-    @media (max-width: 450px) {
+    ${media.medium} {
         width: 80px;
         height: 80px;
         font-size: 17px;
@@ -120,7 +121,7 @@ const BpmMarker = styled.h1`
     text-align: center;
     user-select: none;
 
-    @media (max-width: 450px) {
+    ${media.medium} {
         font-size: 70px;
     }
 `
